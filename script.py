@@ -62,20 +62,15 @@ def get_data_from_hh(search_vacancies_names, headers):
         vacancies_count = 0
         total = 0
         for page in range(0, 999):
-            try:
-                vacancies = get_vacancies_from_hh(search_vacancy_name, page, headers)
-                for vacancy in vacancies['items']:
-                    salary = predict_rub_salary_hh(vacancy)
-                    if salary:
-                        all_salary += salary
-                        vacancies_count += 1
-                if page >= vacancies['pages'] - 1:
-                    total = vacancies['found']
-                    break
-            except requests.HTTPError as error:
-                print(f'Can`t get data:\n{error}')
-            except KeyError as error:
-                print(error)
+            vacancies = get_vacancies_from_hh(search_vacancy_name, page, headers)
+            for vacancy in vacancies['items']:
+                salary = predict_rub_salary_hh(vacancy)
+                if salary:
+                    all_salary += salary
+                    vacancies_count += 1
+            if page >= vacancies['pages'] - 1:
+                total = vacancies['found']
+                break
         vacancies_info.append({
             'vacancies_found': total,
             'vacancy': search_vacancy_name,
@@ -93,20 +88,15 @@ def get_data_from_superjob(search_vacancies_names, token_sj):
         vacancies_count = 0
         total = 0
         for page in range(0, 999):
-            try:
-                vacancies = get_vacancies_from_superjob(search_vacancy_name, page, token_sj)
-                for vacancy in vacancies['objects']:
-                    salary = predict_rub_salary_sj(vacancy)
-                    if salary:
-                        all_salary += salary
-                        vacancies_count += 1
-                if not vacancies['more']:
-                    total = vacancies['total']
-                    break
-            except requests.HTTPError as error:
-                print(f'Can`t get data:\n{error}')
-            except KeyError as error:
-                print(error)
+            vacancies = get_vacancies_from_superjob(search_vacancy_name, page, token_sj)
+            for vacancy in vacancies['objects']:
+                salary = predict_rub_salary_sj(vacancy)
+                if salary:
+                    all_salary += salary
+                    vacancies_count += 1
+            if not vacancies['more']:
+                total = vacancies['total']
+                break
         vacancies_info.append({
             'vacancies_found': total,
             'vacancy': search_vacancy_name,
@@ -122,7 +112,6 @@ def print_table(datasets, title):
     vacancies_found = [dataset['vacancies_found'] for dataset in datasets]
     vacancies_processed = [dataset['vacancies_processed'] for dataset in datasets]
     vacancies_average_salary = [dataset['average_salary'] for dataset in datasets]
-
     table_data = [
         headers,
         [vacancies_name[0], vacancies_found[0], vacancies_processed[0], vacancies_average_salary[0]],
@@ -144,11 +133,16 @@ def main():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'
     }
     search_vacancies_names = ['Программист Python', 'Программист Java', 'Программист PHP']
-    hh_info = get_data_from_hh(search_vacancies_names, headers)
-    print_table(hh_info, 'HeadHunter')
-    if args.sj:
-        sj_info = get_data_from_superjob(search_vacancies_names, args.sj)
-        print_table(sj_info, 'SuperJob')
+    try:
+        hh_info = get_data_from_hh(search_vacancies_names, headers)
+        print_table(hh_info, 'HeadHunter')
+        if args.sj:
+            sj_info = get_data_from_superjob(search_vacancies_names, args.sj)
+            print_table(sj_info, 'SuperJob')
+    except requests.HTTPError as error:
+        print(f'Can`t get data:\n{error}')
+    except KeyError as error:
+        print(error)
 
 
 if __name__ == '__main__':

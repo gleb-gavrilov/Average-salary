@@ -8,6 +8,8 @@
 * Программист PHP
 
 Данные берутся из API сервисов [hh.ru](https://hh.ru/) и [superjob.ru](https://www.superjob.ru/).
+![Result](average_salary_result.png)
+
 
 ## Требования к окружению
 Разработка велась на python 3.7.3
